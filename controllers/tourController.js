@@ -38,7 +38,13 @@ const getAllTours = async (req, res) => {
 
     console.log('parsed operator query', JSON.parse(queryString));
 
-    const query = Tour.find(JSON.parse(queryString));
+    // find returns a query, so we can chain on this
+    let query = Tour.find(JSON.parse(queryString));
+
+    if (req.query.sort) {
+      // ..&sort='price' will be there in the URL
+      query = query.sort(req.query.sort);
+    }
 
     // special mongoose methods.
     // const tours = await Tour.find()
