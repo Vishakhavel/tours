@@ -15,6 +15,51 @@ const tourSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'A tour must have a price'],
   },
+  duration: {
+    type: Number,
+    required: [true, 'A tour must have a duration'],
+  },
+  maxGroupSize: {
+    type: Number,
+    required: [true, 'A tour must have group size'],
+  },
+  difficulty: {
+    type: String,
+    required: [true, 'A tour must have difficulty'],
+  },
+  ratingAverage: {
+    type: Number,
+    // required: [true, ]
+    default: 4.5,
+  },
+  ratingsQuantity: {
+    type: Number,
+    default: 0,
+  },
+  //   you can declare type like this if you dont need any other restriction, instead of putting inside an object
+  priceDiscount: Number,
+  summary: {
+    type: String,
+    // will trim the string. check mongoose docs
+    trim: true,
+    required: [true, 'A tour must have a description'],
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  imageCover: {
+    // file name to fetch it later from a file service.
+    type: String,
+    required: [true, 'A tour must have a cover image'],
+  },
+  // array declared like this
+  images: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  startDates: [Date],
 });
 
 // convention to use Caps first letter with model name
