@@ -22,7 +22,7 @@ const {
 // router.param('id', checkID);
 // chaining middleware checkTourBody before actually creating the tour.
 
-// random comment
+// random comment 2
 
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 router.route('/').get(getAllTours).post(createTour);
