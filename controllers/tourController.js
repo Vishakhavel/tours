@@ -1,5 +1,11 @@
 const Tour = require('./../models/tourModel');
 
+const aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = 'price ratingAverage';
+  req.query.fields = 'name,price,summary,ratingAverage,summary,difficulty';
+  next();
+};
 const getAllTours = async (req, res) => {
   try {
     // find will return an array of all the documents.
@@ -41,9 +47,50 @@ const getAllTours = async (req, res) => {
     // find returns a query, so we can chain on this
     let query = Tour.find(JSON.parse(queryString));
 
+    // sorting
+
     if (req.query.sort) {
       // ..&sort='price' will be there in the URL
-      query = query.sort(req.query.sort);
+      //   will sort first based on the first param, second on the second param, if tied
+      const sortBy = req.query.sort.split(',').join(' ');
+      console.log({ sortBy });
+      //   an arrat
+      //   query = query.sort(req.query.sortBy);
+      //   to get descending order, pass - like : ....?sort=-price,ratingAverage => sorts descending order of price and ascending order of ratingAverage
+      query = query.sort(sortBy);
+      //   mongoose will automatically sort by price!
+      //   TODO: find out how to sort using mongoose if the field is nested inside some other object?
+    } else {
+      // if user does not send any sort query param, sort by latest anyways
+      query = query.sort('-createdAt');
+    }
+
+    // field limiting
+
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      console.log({ fields });
+      query = query.select(fields);
+    } else {
+      // removing internal field __v included by mongoDB
+      query.select('-__v');
+    }
+
+    // pagination
+    // ?page=2&limit=10
+    // convert string to number for page
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) {
+        throw new Error('Page does not exist');
+      }
     }
 
     // special mongoose methods.
@@ -55,6 +102,8 @@ const getAllTours = async (req, res) => {
 
     // EXECUTE THE QUERY. THIS IS SO THAT WE CAN BUILD THE QUERY STEP BY STEP, PAGINATION, FILTERING, RATE LIMITING ETC.
     const tours = await query;
+
+    console.log({ length: tours.length });
 
     res.status(200).json({
       status: 'success',
@@ -84,6 +133,7 @@ const createTour = async (req, res) => {
   // try catch to handle errors in async await instead of .then, .catch in promises
   try {
     const newTour = await Tour.create(req.body);
+    console.log({ newTour });
     res.status(201).json({
       status: 'success',
       data: {
@@ -167,4 +217,5 @@ module.exports = {
   getTour,
   getAllTours,
   updateTour,
+  aliasTopTours,
 };

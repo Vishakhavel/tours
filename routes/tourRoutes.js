@@ -7,6 +7,7 @@ const {
   createTour,
   deleteTour,
   updateTour,
+  aliasTopTours,
 } = require('../controllers/tourController');
 
 // param middleware gets access to a 4th argument which is the value of the paramter in question. we can directly access the value of the param sent in the URL!!
@@ -20,6 +21,8 @@ const {
 // this is really useful, we can validate params seperately without validating the ID inside each function seperately
 // router.param('id', checkID);
 // chaining middleware checkTourBody before actually creating the tour.
+
+router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
 router.route('/').get(getAllTours).post(createTour);
 router.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
